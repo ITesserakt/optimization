@@ -1,7 +1,6 @@
 use crate::functions::Point;
 use crate::method::{GlobalMultiMethod, Optimizer, Steps};
 use crate::restriction::Restriction;
-use std::cmp::min;
 
 pub struct IterativeConditional<const N: usize> {
     inequalities: Vec<Restriction<N>>,
@@ -117,7 +116,7 @@ mod tests {
     use crate::iterative_conditional::{IterativeConditional, Parameters};
     use crate::method::OneDimensionalMethod;
     use crate::restriction::Restriction;
-    use crate::task::{Check, Task};
+    use crate::task::Task;
     use crate::zeidel::GaussZeidel;
     use lazy_static::lazy_static;
 

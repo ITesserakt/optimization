@@ -23,7 +23,7 @@ mod method;
 mod repeating;
 mod restriction;
 mod task;
-mod uniform;
+// mod uniform;
 mod utils;
 mod zeidel;
 

@@ -1,5 +1,4 @@
 use crate::functions::Point;
-use scilib::constant::R;
 use std::rc::Rc;
 
 pub type Func<const N: usize> = Rc<dyn Fn(Point<N>) -> f64>;
