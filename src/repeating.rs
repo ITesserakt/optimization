@@ -16,7 +16,10 @@ impl<const N: usize> Optimizer for RepeatingStochastic<N> {
     type X = Point<N>;
     type Metadata = Steps;
 
-    fn optimize(&self, f: impl Fn(Point<N>) -> Self::F) -> (Point<N>, Self::F, Steps) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         let mut r = 2;
         let beta = self.smoothing[0];
         let gamma = self.smoothing[1];

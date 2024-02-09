@@ -11,7 +11,10 @@ pub struct GoldenRatio {
 impl Optimizer for GoldenRatio {
     type Metadata = Steps;
 
-    fn optimize(&self, f: impl Fn(Self::X) -> Self::F) -> (Self::X, Self::F, Steps) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         #[derive(Eq, PartialEq)]
         enum Side {
             Left,

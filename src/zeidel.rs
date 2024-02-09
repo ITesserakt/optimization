@@ -14,14 +14,17 @@ impl<const N: usize> Optimizer for GaussZeidel<N> {
     type X = Point<N>;
     type Metadata = Steps;
 
-    fn optimize(&self, f: impl Fn(Point<N>) -> Self::F) -> (Point<N>, Self::F, Steps) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         let mut x = self.start;
         let mut x_ = self.start.clone().map(|x| x + 2.0 * self.eps_x);
         let mut r = 1;
 
         while (x - x_).norm() > self.eps_x && (f(x) - f(x_)).abs() > self.eps_y {
             x_ = x;
-            x = self.full_step(&f, x);
+            x = self.full_step(&mut f, x);
             r += 1;
         }
 
@@ -39,7 +42,12 @@ impl<const N: usize> GaussZeidel<N> {
         }
     }
 
-    pub fn step(&self, f: &impl Fn(Point<N>) -> f64, direction: usize, x: &Point<N>) -> Point<N> {
+    pub fn step(
+        &self,
+        f: &mut impl FnMut(Point<N>) -> f64,
+        direction: usize,
+        x: &Point<N>,
+    ) -> Point<N> {
         let mut l: Point<N> = SVector::from_element(0.0);
         l[direction] = 1.0;
         let next_x = |lambda: f64| x + lambda * l;
@@ -48,7 +56,7 @@ impl<const N: usize> GaussZeidel<N> {
         next_x(lambda)
     }
 
-    pub fn full_step(&self, f: &impl Fn(Point<N>) -> f64, mut x: Point<N>) -> Point<N> {
+    pub fn full_step(&self, f: &mut impl FnMut(Point<N>) -> f64, mut x: Point<N>) -> Point<N> {
         for i in 0..N {
             x = self.step(f, i, &x);
         }

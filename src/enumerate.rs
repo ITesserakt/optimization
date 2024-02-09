@@ -14,7 +14,10 @@ pub struct Enumerate {
 impl Optimizer for Enumerate {
     type Metadata = ();
 
-    fn optimize(&self, f: impl Fn(Self::X) -> Self::F) -> (Self::X, Self::F, ()) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         let a = *self.range.start();
         let b = *self.range.end();
         let x = linspace(a, b, self.n)
@@ -47,7 +50,10 @@ impl<const N: usize> Optimizer for MonteCarlo<N> {
     type X = Point<N>;
     type Metadata = ();
 
-    fn optimize(&self, f: impl Fn(Point<N>) -> Self::F) -> (Point<N>, Self::F, ()) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         let map_to = |x, y: RangeInclusive<f64>| return (y.end() - y.start()) * x + y.start();
 
         let x = (0..self.n)

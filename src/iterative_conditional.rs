@@ -79,7 +79,10 @@ impl<const N: usize> Optimizer for IterativeConditional<N> {
     type X = Point<N>;
     type Metadata = Steps;
 
-    fn optimize(&self, f: impl Fn(Point<N>) -> Self::F) -> (Point<N>, Self::F, Steps) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         let mut r = 0;
         let mut x = self.start;
         let mut x_ = self.start;

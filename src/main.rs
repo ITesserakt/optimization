@@ -8,6 +8,8 @@
 #![feature(cell_update)]
 #![deny(clippy::perf)]
 
+extern crate core;
+
 mod approx_model;
 mod backward;
 mod binary;

@@ -4,6 +4,7 @@ use polynomial::Polynomial;
 use rand::{thread_rng, Rng};
 use roots::find_root_inverse_quadratic;
 use scilib::math::polynomial::Poly;
+use std::cell::RefCell;
 use std::cmp::min_by_key;
 use std::ops::RangeInclusive;
 
@@ -53,12 +54,18 @@ impl ApproxModel {
 
         root.unwrap_or_else(|_| min_by_key(f(a), f(b), |x| OrderedFloat(*x)))
     }
+
+    fn fn_mut_to_fn<I, O, F: FnMut(I) -> O>(f: F) -> impl Fn(I) -> O {
+        let cell = RefCell::new(f);
+        move |x| (cell.borrow_mut())(x)
+    }
 }
 
 impl Optimizer for ApproxModel {
     type Metadata = Steps;
 
-    fn optimize(&self, f: impl Fn(Self::X) -> Self::F) -> (Self::X, Self::F, Steps) {
+    fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Self::X, Self::F, Self::Metadata) {
+        let f = ApproxModel::fn_mut_to_fn(f);
         let (polynomial, tries) = self.build_polynomial(&f);
         let minimum = self.find_minimum(polynomial, &f);
 

@@ -15,16 +15,19 @@ impl<const N: usize> Optimizer for ConjugateDirections<N> {
     type X = Point<N>;
     type Metadata = Steps;
 
-    fn optimize(&self, f: impl Fn(Point<N>) -> Self::F) -> (Point<N>, Self::F, Steps) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         let mut r = 0;
         let mut x = self.start;
 
         loop {
             let gauss = GaussZeidel::new(x, self.optimizer.clone(), self.eps_x, self.eps_y);
-            let x0 = gauss.step(&f, 0, &x);
+            let x0 = gauss.step(&mut f, 0, &x);
 
             let gauss = GaussZeidel::new(x0, self.optimizer.clone(), self.eps_x, self.eps_x);
-            let xn = gauss.full_step(&f, x0);
+            let xn = gauss.full_step(&mut f, x0);
 
             let p = xn - x0;
             let step = |lambda: f64| x0 + lambda * p;

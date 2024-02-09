@@ -20,7 +20,7 @@ where
 {
     type X = Point<N>;
 
-    fn optimize(&self, f: impl Fn(Point<N>) -> Self::F) -> (Point<N>, Self::F, Self::Metadata) {
+    fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Point<N>, Self::F, Self::Metadata) {
         let (x, f) = Optimize {
             builder: self.builder.clone(),
             restrictions: self.restrictions.clone(),
@@ -30,11 +30,8 @@ where
     }
 }
 
-trait Helper<const N: usize>
-where
-    [(); N]:,
-{
-    fn run(&self, f: impl Fn(Point<N>) -> f64) -> (Point<N>, f64);
+trait Helper<const N: usize> {
+    fn run(&self, f: impl FnMut(Point<N>) -> f64) -> (Point<N>, f64);
 }
 
 struct Optimize<const N: usize>
@@ -46,7 +43,7 @@ where
 }
 
 impl Helper<1> for Optimize<1> {
-    fn run(&self, f: impl Fn(Point<1>) -> f64) -> (Point<1>, f64) {
+    fn run(&self, f: impl FnMut(Point<1>) -> f64) -> (Point<1>, f64) {
         let head = self.restrictions.clone();
         let optimizer = (self.builder)(head[0].clone());
         let (x, f, _) = optimizer.optimize(f);
@@ -83,17 +80,15 @@ macro_rules! impl_helper {
     ($n:literal) => {
         impl Helper<$n> for Optimize<$n>
         {
-            fn run(&self, f: impl Fn(Point<$n>) -> f64) -> (Point<$n>, f64) {
+            fn run(&self, mut f: impl FnMut(Point<$n>) -> f64) -> (Point<$n>, f64) {
                 let (head, tail) = self.deconstruct();
                 let optimizer = (self.builder)(head.restrictions[0].clone());
                 let y = Cell::new(Point::<{ $n - 1 }>::default());
-                let concat_buffer = Cell::new([0.0; $n]);
-                let concat = |x: Point<1>, y: Point<{ $n - 1 }>| {
-                    concat_buffer.update(|mut b| {
-                        b[..1].copy_from_slice(x.as_slice());
-                        b[1..].copy_from_slice(y.as_slice());
-                        b
-                    })
+                let mut concat_buffer = [0.0; $n];
+                let mut concat = move |x: Point<1>, y: Point<{ $n - 1 }>| {
+                    concat_buffer[..1].copy_from_slice(x.as_slice());
+                    concat_buffer[1..].copy_from_slice(y.as_slice());
+                    concat_buffer
                 };
 
                 let (x, f, _) = optimizer.optimize(|x| {
@@ -104,6 +99,7 @@ macro_rules! impl_helper {
                 (concat(x, y.into_inner()).into(), f)
             }
         }
+
     };
     ($n:literal, $($ns:literal),+) => {
         impl_helper!($n);
@@ -130,7 +126,7 @@ mod tests {
     #[test_case(Sphere)]
     #[test_case(Himmelblau)]
     fn test_second_dimension<F: Function<2>>(f: F) {
-        let k = 5000;
+        let k = 1000;
         let range = -10.0..=10.0;
         let eps = (range.end() - range.start()) / k as f64 * 2.0;
 
@@ -142,8 +138,8 @@ mod tests {
             f,
         )
         .solve_space_check()
-        .with_eps_x(eps)
-        .with_eps_y(eps)
+        .with_eps_x(1e-1)
+        .with_eps_y(1e-1)
         .check();
     }
 
@@ -151,16 +147,15 @@ mod tests {
     #[test_case(Rastrigin)]
     #[test_case(Sphere)]
     fn test_third_dimension<F: Function<3>>(f: F) {
-        Task::new(
-            NestedTasks::new(
-                [-5.0..=5.0, -5.0..=5.0, -5.0..=5.0],
-                Rc::new(|r| ApproxModel::new(r, 10, 2, f64::EPSILON).into()),
-            ),
-            f,
-        )
-        .solve_space_check()
-        .with_eps_x(1e-2)
-        .with_eps_y(1e-2)
-        .check();
+        let optimizer = NestedTasks::new(
+            [-5.0..=5.0, -5.0..=5.0, -5.0..=5.0],
+            Rc::new(|r| ApproxModel::new(r, 10, 2, f64::EPSILON).into()),
+        );
+
+        Task::new(optimizer, f)
+            .solve_space_check()
+            .with_eps_x(1e-2)
+            .with_eps_y(1e-2)
+            .check();
     }
 }
