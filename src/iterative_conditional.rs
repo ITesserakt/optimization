@@ -118,7 +118,7 @@ mod tests {
     use crate::restriction::Restriction;
     use crate::task::Task;
     use crate::zeidel::GaussZeidel;
-    use lazy_static::lazy_static;
+    use std::sync::LazyLock;
 
     struct Func;
 
@@ -168,10 +168,8 @@ mod tests {
         }
     }
 
-    lazy_static! {
-        static ref LOCAL_OPTIMIZER: OneDimensionalMethod =
-            ApproxModel::new(-10.0..=10.0, 3, 1, 1e-15).into();
-    }
+    static LOCAL_OPTIMIZER: LazyLock<OneDimensionalMethod> =
+        LazyLock::new(|| ApproxModel::new(-10.0..=10.0, 3, 1, 1e-15).into());
 
     #[test]
     fn test_iterative_conditional() {

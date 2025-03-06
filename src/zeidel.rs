@@ -74,7 +74,7 @@ mod tests {
     use crate::method::OneDimensionalMethod;
     use crate::task::{Check, Task};
     use crate::zeidel::GaussZeidel;
-    use lazy_static::lazy_static;
+    use std::sync::LazyLock;
     use test::Bencher;
 
     #[test]
@@ -93,12 +93,12 @@ mod tests {
         .check();
     }
 
-    lazy_static! {
-        static ref METHODS: [OneDimensionalMethod; 2] = [
+    static METHODS: LazyLock<[OneDimensionalMethod; 2]> = LazyLock::new(|| {
+        [
             GoldenRatio::new(-10.0..=10.0, 1e-6).into(),
             Binary::new(-10.0..=10.0, 1e-6, 1e-7).into(),
-        ];
-    }
+        ]
+    });
 
     #[must_use]
     fn helper<F: Function<2>>(f: F, method: &OneDimensionalMethod) -> Check<2, F> {

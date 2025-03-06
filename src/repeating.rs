@@ -70,22 +70,22 @@ impl<const N: usize> Optimizer for RepeatingStochastic<N> {
 
 #[cfg(test)]
 mod tests {
-    use crate::functions::{Booth, Function, Himmelblau, Sphere};
+    use crate::functions::*;
     use crate::repeating::RepeatingStochastic;
     use crate::task::Task;
-    use lazy_static::lazy_static;
+    use std::sync::LazyLock;
     use test_case::test_case;
 
-    lazy_static! {
-        static ref OPTIMIZER: RepeatingStochastic<2> = RepeatingStochastic::new(
+    static OPTIMIZER: LazyLock<RepeatingStochastic<2>> = LazyLock::new(|| {
+        RepeatingStochastic::new(
             [[10.0, 5.0].into(), [2.0, 3.0].into(), [4.0, 9.0].into()],
             0.5,
             [0.5, 0.5],
             1e-12,
             1e-12,
             10,
-        );
-    }
+        )
+    });
 
     #[test_case(Booth; "booth")]
     #[test_case(Sphere; "sphere")]

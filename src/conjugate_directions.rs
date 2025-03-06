@@ -49,21 +49,22 @@ impl<const N: usize> Optimizer for ConjugateDirections<N> {
 #[cfg(test)]
 mod tests {
     extern crate test;
+
     use crate::conjugate_directions::ConjugateDirections;
     use crate::fibonacci::GoldenRatio;
     use crate::functions::{Booth, Himmelblau, Sphere};
     use crate::task::Task;
-    use lazy_static::lazy_static;
+    use std::sync::LazyLock;
     use test::Bencher;
 
-    lazy_static! {
-        static ref OPTIMIZER: ConjugateDirections<2> = ConjugateDirections::new(
+    static OPTIMIZER: LazyLock<ConjugateDirections<2>> = LazyLock::new(|| {
+        ConjugateDirections::new(
             [-2.0, -5.0].into(),
             GoldenRatio::new(-10.0..=10.0, 1e-9).into(),
             1e-9,
             1e-10,
-        );
-    }
+        )
+    });
 
     #[bench]
     fn test_conjugate_dirs_booth_golden_ratio(b: &mut Bencher) {
