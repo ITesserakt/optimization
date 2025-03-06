@@ -1,7 +1,6 @@
 use crate::functions::{Function, Point};
 use crate::method::Optimizer;
 
-use crate::restriction::Restriction;
 #[cfg(test)]
 use approx::assert_relative_eq;
 #[cfg(test)]
@@ -29,7 +28,7 @@ pub struct Check<const N: usize, F: Function<N>> {
     eps_y: f64,
     x: Point<N>,
     f: f64,
-    restrictions: Vec<Restriction<N>>,
+    restrictions: Vec<crate::restriction::Restriction<N>>,
     _phantom: PhantomData<F>,
 }
 
@@ -74,7 +73,7 @@ impl<const N: usize, F: Function<N>> Check<N, F> {
         assert_relative_eq!(self.f, F::F, epsilon = self.eps_y);
     }
 
-    pub fn satisfy_restrictions(self, restrictions: Vec<Restriction<N>>) -> Self {
+    pub fn satisfy_restrictions(self, restrictions: Vec<crate::restriction::Restriction<N>>) -> Self {
         Self {
             restrictions,
             ..self

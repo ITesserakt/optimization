@@ -90,7 +90,7 @@ impl<const N: usize> Optimizer for IterativeConditional<N> {
 
         loop {
             let q = |x: Point<N>| f(x) + self.tax(x, &params);
-            let (new_x, _, s) = (self.optimizer)(x).optimize(q);
+            let (new_x, _, _) = (self.optimizer)(x).optimize(q);
             x = new_x;
             (self.control_hook)(&mut params);
 

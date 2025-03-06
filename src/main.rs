@@ -4,11 +4,7 @@
 #![feature(iter_intersperse)]
 #![feature(generic_const_exprs)]
 #![feature(slice_as_chunks)]
-#![feature(slice_first_last_chunk)]
 #![feature(cell_update)]
-#![deny(clippy::perf)]
-
-extern crate core;
 
 mod approx_model;
 mod backward;

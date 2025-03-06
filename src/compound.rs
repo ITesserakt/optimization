@@ -83,7 +83,7 @@ macro_rules! impl_helper {
             fn run(&self, mut f: impl FnMut(Point<$n>) -> f64) -> (Point<$n>, f64) {
                 let (head, tail) = self.deconstruct();
                 let optimizer = (self.builder)(head.restrictions[0].clone());
-                let y = Cell::new(Point::<{ $n - 1 }>::default());
+                let mut y = Default::default();
                 let mut concat_buffer = [0.0; $n];
                 let mut concat = move |x: Point<1>, y: Point<{ $n - 1 }>| {
                     concat_buffer[..1].copy_from_slice(x.as_slice());
@@ -93,10 +93,10 @@ macro_rules! impl_helper {
 
                 let (x, f, _) = optimizer.optimize(|x| {
                     let (x, f) = tail.run(|y| f(concat(x, y).into()));
-                    y.set(x);
+                    y = x;
                     f
                 });
-                (concat(x, y.into_inner()).into(), f)
+                (concat(x, y).into(), f)
             }
         }
 
