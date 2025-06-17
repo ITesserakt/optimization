@@ -12,10 +12,8 @@
 	pkgs = import nixpkgs { inherit system; };
 	toolchain = fenix.packages.${system}.latest.toolchain;
   in {
-	devShells.${system}.default = pkgs.mkShell {
-	  packages = with pkgs; [
-	  	toolchain
-	  ];
-	};
+  	devShells.${system}.default = pkgs.mkShell {
+      packages = [ toolchain ];
+  	};
   };
 }
