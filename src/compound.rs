@@ -136,7 +136,7 @@ mod tests {
     #[test_case(Tang)]
     #[test_case(Rastrigin)]
     #[test_case(Sphere)]
-    fn test_third_dimension<F: Function<5>>(f: F) {
+    fn test_fifth_dimension<F: Function<5>>(f: F) {
         let optimizer = NestedTasks::new(
             [0; 5].map(|_| -5.0..=5.0),
             Rc::new(|r| ApproxModel::new(r, 4, 2, f64::EPSILON).into()),
