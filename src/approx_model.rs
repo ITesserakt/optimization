@@ -1,7 +1,7 @@
 use crate::method::{Optimizer, Steps};
 use ordered_float::OrderedFloat;
 use polynomial::Polynomial;
-use rand::{thread_rng, Rng};
+use rand::{Rng, rng};
 use roots::find_root_inverse_quadratic;
 use scilib::math::polynomial::Poly;
 use std::cell::RefCell;
@@ -25,14 +25,16 @@ impl ApproxModel {
         let a = *self.range.start();
         let b = *self.range.end();
         let mut polynomial: Option<Polynomial<f64>> = None;
-        let mut random = thread_rng();
+        let mut random = rng();
         let mut r = 0;
 
         for _ in 0..self.m {
-            let test = random.gen_range(self.range.clone());
+            let test = random.random_range(self.range.clone());
             let y = f(test);
 
-            if let Some(ref poly) = polynomial && (poly.eval(test) - y).abs() < self.eps {
+            if let Some(ref poly) = polynomial
+                && (poly.eval(test) - y).abs() < self.eps
+            {
                 continue;
             }
 

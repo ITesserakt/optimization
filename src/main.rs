@@ -1,10 +1,10 @@
+#![allow(dead_code)]
 #![feature(associated_type_defaults)]
 #![feature(let_chains)]
 #![feature(test)]
 #![feature(iter_intersperse)]
 #![feature(generic_const_exprs)]
-#![feature(slice_as_chunks)]
-#![feature(cell_update)]
+#![feature(slice_as_array)]
 
 mod approx_model;
 mod backward;
