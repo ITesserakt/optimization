@@ -32,7 +32,7 @@ impl<const N: usize> Optimizer for RepeatingStochastic<N> {
         let mut lambda = self.lambda;
 
         'outer: loop {
-            let mut next_x = x;
+            let mut next_x;
             let mut tries = 0;
             'inner: loop {
                 let p: Point<N> = (Point::<N>::new_random() * 2.0) - Point::from([1.0; N]);

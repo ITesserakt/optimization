@@ -43,6 +43,8 @@ impl<const N: usize, F: Function<N>> Check<N, F> {
     }
 
     pub fn check(self) {
+        use crate::utils::IntersperseIteratorExt;
+        
         let any_x_eq = F::X().into_iter().any(|point| {
             self.x
                 .into_iter()
@@ -59,7 +61,7 @@ impl<const N: usize, F: Function<N>> Check<N, F> {
             F::X()
                 .into_iter()
                 .map(|x| x.to_string())
-                .intersperse(" or ".to_string())
+                .intersperse_ext(" or ".to_string())
                 .collect::<String>()
         );
 

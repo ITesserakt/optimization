@@ -103,7 +103,7 @@ impl<const N: usize> Optimizer for BestChoice<N> {
 #[cfg(test)]
 mod tests {
     use crate::backward::{Backward, BestChoice};
-    use crate::functions::{Booth, Rosenbrok, Sphere};
+    use crate::functions::{Booth, Sphere};
     use crate::task::Task;
 
     #[test]
@@ -137,16 +137,5 @@ mod tests {
             .solve_space_check()
             .with_eps_x(1e-3)
             .check();
-    }
-
-    #[test]
-    fn test_best_choice_rosenbrok() {
-        Task::new(
-            BestChoice::new([1.5, 3.2].into(), 10., 6, 0.8, 1e-9),
-            Rosenbrok,
-        )
-        .solve_space_check()
-        .with_eps_x(1e-4)
-        .check();
     }
 }

@@ -67,16 +67,14 @@ impl<const N: usize> GaussZeidel<N> {
 
 #[cfg(test)]
 mod tests {
-    extern crate test;
-
     use crate::binary::Binary;
+    use crate::def_test;
     use crate::fibonacci::GoldenRatio;
     use crate::functions::{Booth, Function, Himmelblau, Rosenbrok, Sphere};
     use crate::method::OneDimensionalMethod;
     use crate::task::{Check, Task};
     use crate::zeidel::GaussZeidel;
     use std::sync::LazyLock;
-    use test::Bencher;
 
     #[test]
     fn test_gauss_zeidel_rosenbrok() {
@@ -110,23 +108,19 @@ mod tests {
         .solve_space_check()
     }
 
-    #[bench]
-    fn test_gauss_zeidel_booth_binary(b: &mut Bencher) {
-        b.iter(|| helper(Booth, &METHODS[1]).check())
-    }
+    def_test! (test_gauss_zeidel_booth_binary {
+        helper(Booth, &METHODS[1]).check()
+    });
 
-    #[bench]
-    fn test_gauss_zeidel_booth_golden_ratio(b: &mut Bencher) {
-        b.iter(|| helper(Booth, &METHODS[0]).check())
-    }
+    def_test!(test_gauss_zeidel_booth_golden_ratio {
+        helper(Booth, &METHODS[0]).check()
+    });
 
-    #[bench]
-    fn test_gauss_zeidel_himmelblau_golden_ratio(b: &mut Bencher) {
-        b.iter(|| helper(Himmelblau, &METHODS[0]).check())
-    }
+    def_test!(test_gauss_zeidel_himmelblau_golden_ratio {
+        helper(Himmelblau, &METHODS[0]).check()
+    });
 
-    #[test]
-    fn test_gauss_zeidel_sphere_golden_ratio() {
+    def_test!(test_gauss_zeidel_sphere_golden_ratio {
         helper(Sphere, &METHODS[0]).check()
-    }
+    });
 }
