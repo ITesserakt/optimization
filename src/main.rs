@@ -1,15 +1,11 @@
 #![allow(dead_code)]
-#![feature(associated_type_defaults)]
-#![feature(let_chains)]
-#![feature(test)]
 #![feature(iter_intersperse)]
-#![feature(generic_const_exprs)]
-#![feature(slice_as_array)]
+#![feature(test)]
 
 mod approx_model;
 mod backward;
 mod binary;
-mod compound;
+// mod compound;
 mod conjugate_directions;
 mod enumerate;
 mod fibonacci;

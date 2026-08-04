@@ -27,6 +27,7 @@ impl<const N: usize> Backward<N> {
 
 impl<const N: usize> Optimizer for Backward<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(
@@ -70,6 +71,7 @@ pub struct BestChoice<const N: usize> {
 
 impl<const N: usize> Optimizer for BestChoice<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(

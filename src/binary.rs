@@ -9,6 +9,8 @@ pub struct Binary {
 }
 
 impl Optimizer for Binary {
+    type X = f64;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(

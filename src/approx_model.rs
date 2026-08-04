@@ -64,6 +64,8 @@ impl ApproxModel {
 }
 
 impl Optimizer for ApproxModel {
+    type X = f64;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Self::X, Self::F, Self::Metadata) {

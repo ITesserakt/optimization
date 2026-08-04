@@ -12,6 +12,8 @@ pub struct Enumerate {
 }
 
 impl Optimizer for Enumerate {
+    type X = f64;
+    type F = f64;
     type Metadata = ();
 
     fn optimize(
@@ -48,6 +50,7 @@ pub struct MonteCarlo<const N: usize> {
 
 impl<const N: usize> Optimizer for MonteCarlo<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = ();
 
     fn optimize(

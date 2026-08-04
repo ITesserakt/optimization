@@ -7,9 +7,9 @@ use crate::zeidel::GaussZeidel;
 use derive_more::From;
 
 pub trait Optimizer {
-    type X = f64;
-    type F = f64;
-    type Metadata = ();
+    type X;
+    type F;
+    type Metadata;
 
     fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Self::X, Self::F, Self::Metadata);
 }
@@ -36,6 +36,8 @@ pub enum GlobalMultiMethod<const N: usize> {
 }
 
 impl Optimizer for OneDimensionalMethod {
+    type X = f64;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Self::X, Self::F, Self::Metadata) {
@@ -49,6 +51,8 @@ impl Optimizer for OneDimensionalMethod {
 
 impl Optimizer for GlobalOneDimensionalMethod {
     type X = Point<1>;
+    type F = f64;
+    type Metadata = ();
 
     fn optimize(
         &self,
@@ -69,6 +73,7 @@ impl Optimizer for GlobalOneDimensionalMethod {
 
 impl<const N: usize> Optimizer for GlobalMultiMethod<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Self::X, Self::F, Self::Metadata) {

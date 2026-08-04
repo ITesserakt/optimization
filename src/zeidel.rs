@@ -12,6 +12,7 @@ pub struct GaussZeidel<const N: usize> {
 
 impl<const N: usize> Optimizer for GaussZeidel<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(

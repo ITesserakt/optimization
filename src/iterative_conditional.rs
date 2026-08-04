@@ -76,6 +76,7 @@ impl<const N: usize> IterativeConditional<N> {
 
 impl<const N: usize> Optimizer for IterativeConditional<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(

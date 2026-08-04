@@ -18,6 +18,8 @@ where
     Optimize<N>: Helper<N>,
 {
     type X = Point<N>;
+    type F = f64;
+    type Metadata = ();
 
     fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Point<N>, Self::F, Self::Metadata) {
         let (x, f) = Optimize {

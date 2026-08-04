@@ -13,6 +13,7 @@ pub struct ConjugateDirections<const N: usize> {
 
 impl<const N: usize> Optimizer for ConjugateDirections<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(

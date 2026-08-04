@@ -14,6 +14,7 @@ pub struct RepeatingStochastic<const N: usize> {
 
 impl<const N: usize> Optimizer for RepeatingStochastic<N> {
     type X = Point<N>;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(

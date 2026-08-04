@@ -9,6 +9,8 @@ pub struct GoldenRatio {
 }
 
 impl Optimizer for GoldenRatio {
+    type X = f64;
+    type F = f64;
     type Metadata = Steps;
 
     fn optimize(
