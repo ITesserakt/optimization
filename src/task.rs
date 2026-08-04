@@ -3,6 +3,7 @@ use crate::method::Optimizer;
 
 #[cfg(test)]
 use approx::assert_relative_eq;
+use nalgebra::DVector;
 #[cfg(test)]
 use std::fmt::Debug;
 #[cfg(test)]
@@ -30,6 +31,22 @@ pub struct Check<const N: usize, F: Function<N>> {
     f: f64,
     restrictions: Vec<crate::restriction::Restriction<N>>,
     _phantom: PhantomData<F>,
+}
+
+pub trait MaybeStatic<const N: usize> {
+    fn as_static(self) -> Point<N>;
+}
+
+impl<const N: usize> MaybeStatic<N> for Point<N> {
+    fn as_static(self) -> Point<N> {
+        self
+    }
+}
+
+impl<const N: usize> MaybeStatic<N> for DVector<f64> {
+    fn as_static(self) -> Point<N> {
+        Point::from_row_slice(self.as_slice())
+    }
 }
 
 #[cfg(test)]
@@ -113,20 +130,22 @@ where
     }
 }
 
-impl<O, F, const N: usize> Task<O, F>
-where
-    O: Optimizer<X = Point<N>, F = f64>,
-    F: Function<N>,
+impl<O, F> Task<O, F>
 {
-    pub fn solve_space(self) -> (Point<N>, O::F, O::Metadata) {
-        self.optimizer.optimize(F::f)
+    pub fn solve_space<const N: usize>(self) -> (O::X, O::F, O::Metadata)
+    where
+        O: Optimizer<X: MaybeStatic<N>, F = f64>,
+        F: Function<N>,
+    {
+        self.optimizer.optimize(|p| F::f(p.as_static()))
     }
 
     #[cfg(test)]
     #[must_use]
-    pub fn solve_space_check(self) -> Check<N, F>
+    pub fn solve_space_check<const N: usize>(self) -> Check<N, F>
     where
-        O::Metadata: Debug,
+        O: Optimizer<X: MaybeStatic<N>, F = f64, Metadata: Debug>,
+        F: Function<N>,
     {
         let (xs, f, m) = self.solve_space();
         dbg!(m);
@@ -134,7 +153,7 @@ where
         Check {
             eps_x: 1e-5,
             eps_y: 1e-5,
-            x: xs,
+            x: xs.as_static(),
             f,
             restrictions: vec![],
             _phantom: Default::default(),

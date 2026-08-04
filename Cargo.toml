@@ -9,14 +9,14 @@ edition = "2024"
 clippy.perf = "deny"
 
 [dependencies]
+derive_more = { version = "2.0.1", features = ["constructor", "from"] }
+nalgebra = { version = "0.33.2", features= ["rand"] }
 num = "0.4.0"
 ordered-float = "5.0.0"
-rand = "0.9.0"
-nalgebra = { version = "0.33.2", features=["rand"] }
-scilib = "1.0.0"
-roots = "0.0.8"
 polynomial = "0.2.6"
-derive_more = { version = "2.0.1", features = ["constructor", "from"] }
+rand = "0.10.0"
+roots = "0.0.8"
+scilib = "1.0.0"
 
 [dev-dependencies]
 approx = "0.5.1"

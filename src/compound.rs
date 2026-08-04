@@ -1,100 +1,83 @@
-use crate::functions::Point;
 use crate::method::{GlobalOneDimensionalMethod, Optimizer};
-use crate::utils::{Bool, True};
 use derive_more::Constructor;
+use nalgebra::{DVector, SVector};
 use std::ops::RangeInclusive;
 use std::rc::Rc;
 
 type Restriction = RangeInclusive<f64>;
+type Point = DVector<f64>;
 
 #[derive(Constructor)]
-pub struct NestedTasks<const N: usize> {
-    restrictions: [Restriction; N],
+pub struct NestedTasks {
+    restrictions: Vec<Restriction>,
     builder: Rc<dyn Fn(Restriction) -> GlobalOneDimensionalMethod>,
 }
 
-impl<const N: usize> Optimizer for NestedTasks<N>
-where
-    Optimize<N>: Helper<N>,
-{
-    type X = Point<N>;
+impl Optimizer for NestedTasks {
+    type X = Point;
     type F = f64;
     type Metadata = ();
 
-    fn optimize(&self, f: impl FnMut(Self::X) -> Self::F) -> (Point<N>, Self::F, Self::Metadata) {
+    fn optimize(
+        &self,
+        mut f: impl FnMut(Self::X) -> Self::F,
+    ) -> (Self::X, Self::F, Self::Metadata) {
         let (x, f) = Optimize {
             builder: self.builder.clone(),
-            restrictions: self.restrictions.clone(),
+            restrictions: &self.restrictions,
         }
-        .run(f);
+        .run(Box::new(|p| f(p)));
         (x, f, ())
     }
 }
 
-trait Helper<const N: usize> {
-    fn run(&self, f: impl FnMut(Point<N>) -> f64) -> (Point<N>, f64);
-}
-
-struct Optimize<const N: usize> {
+struct Optimize<'a> {
     builder: Rc<dyn Fn(Restriction) -> GlobalOneDimensionalMethod>,
-    restrictions: [Restriction; N],
+    restrictions: &'a [Restriction],
 }
 
-impl Helper<1> for Optimize<1> {
-    fn run(&self, f: impl FnMut(Point<1>) -> f64) -> (Point<1>, f64) {
-        let [head] = self.restrictions.clone();
-        let optimizer = (self.builder)(head);
-        let (x, f, _) = optimizer.optimize(f);
-        (x, f)
-    }
-}
-
-impl<const N: usize> Optimize<N> {
-    fn deconstruct(&self) -> (Optimize<1>, Optimize<{ N - 1 }>)
-    where
-        [(); N - 1]:,
-    {
-        let (r, rs) = (
-            self.restrictions[0].clone(),
-            self.restrictions[1..].as_array().unwrap(),
-        );
+impl Optimize<'_> {
+    #[inline]
+    fn deconstruct(&self) -> (Optimize<'_>, Optimize<'_>) {
+        let (r, rs) = self.restrictions.split_first().unwrap();
         let lesser = Optimize {
             builder: self.builder.clone(),
-            restrictions: [r],
+            restrictions: std::slice::from_ref(r),
         };
 
-        let higher = if N > 1 {
+        let higher = if rs.len() > 0 {
             Optimize {
                 builder: self.builder.clone(),
-                restrictions: rs.clone(),
+                restrictions: rs,
             }
         } else {
             unreachable!("Deconstruct should not be called with N = 1")
         };
         (lesser, higher)
     }
-}
 
-impl<const N: usize> Helper<N> for Optimize<N>
-where
-    Bool<{ N > 1 }>: True,
-    Point<{ N - 1 }>: Default,
-    Optimize<{ N - 1 }>: Helper<{ N - 1 }>,
-{
-    fn run(&self, mut f: impl FnMut(Point<N>) -> f64) -> (Point<N>, f64) {
-        let concat = |a: Point<1>, mut b: Point<{ N - 1 }>| {
-            let [[x]] = a.data.0;
-            let mut buffer = [x; N];
-            buffer[1..].swap_with_slice(&mut b.data.0[0]);
-            buffer.into()
+    fn run<'a>(&self, mut f: Box<dyn FnMut(Point) -> f64 + 'a>) -> (Point, f64) {
+        let n = self.restrictions.len();
+        if n == 1 {
+            let [head] = self.restrictions else {
+                unreachable!()
+            };
+            let optimizer = (self.builder)(head.clone());
+            let (x, f, _) = optimizer.optimize(|p| f(Point::from_vec(vec![p.into_scalar()])));
+            return (Point::from_element(1, x.into_scalar()), f);
+        }
+
+        let concat = |a: SVector<f64, 1>, b: Point| {
+            let x = a.into_scalar();
+            b.insert_row(0, x)
         };
 
-        let (head, tail): (Optimize<1>, Optimize<{ N - 1 }>) = self.deconstruct();
+        let (head, tail) = self.deconstruct();
         let optimizer = (self.builder)(head.restrictions[0].clone());
-        let mut ys = Point::<{ N - 1 }>::default();
+        let mut ys = Point::default();
 
         let (x, f, _) = optimizer.optimize(|x| {
-            let (x, f) = tail.run(|y| f(concat(x, y)));
+            let (x, f) = tail.run(Box::new(|y| f(concat(x, y))));
             ys = x;
             f
         });
@@ -124,7 +107,7 @@ mod tests {
 
         Task::new(
             NestedTasks::new(
-                [range.clone(), range.clone()],
+                vec![range.clone(), range.clone()],
                 Rc::new(move |r| MonteCarlo::new([r], k).into()),
             ),
             f,
@@ -138,9 +121,9 @@ mod tests {
     #[test_case(Tang)]
     #[test_case(Rastrigin)]
     #[test_case(Sphere)]
-    fn test_fifth_dimension<F: Function<5>>(f: F) {
+    fn test_sixth_dimension<F: Function<5>>(f: F) {
         let optimizer = NestedTasks::new(
-            [0; 5].map(|_| -5.0..=5.0),
+            [0; 5].map(|_| -5.0..=5.0).to_vec(),
             Rc::new(|r| ApproxModel::new(r, 4, 2, f64::EPSILON).into()),
         );
 

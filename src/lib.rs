@@ -1,10 +1,10 @@
 #![allow(dead_code)]
-#![cfg_attr(feature = "nightly", test)]
+#![cfg_attr(all(feature = "nightly", test), feature(test))]
 
 mod approx_model;
 mod backward;
 mod binary;
-// mod compound;
+mod compound;
 mod conjugate_directions;
 mod enumerate;
 mod fibonacci;
@@ -22,7 +22,7 @@ mod zeidel;
 mod test {
     #[cfg(feature = "nightly")]
     extern crate test;
-    
+
     #[cfg(feature = "nightly")]
     pub type Bencher = test::Bencher;
 

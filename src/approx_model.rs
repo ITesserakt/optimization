@@ -1,7 +1,7 @@
 use crate::method::{Optimizer, Steps};
 use ordered_float::OrderedFloat;
 use polynomial::Polynomial;
-use rand::{Rng, rng};
+use rand::{RngExt, rng};
 use roots::find_root_inverse_quadratic;
 use scilib::math::polynomial::Poly;
 use std::cell::RefCell;
