@@ -34,17 +34,17 @@ pub struct Check<const N: usize, F: Function<N>> {
 }
 
 pub trait MaybeStatic<const N: usize> {
-    fn as_static(self) -> Point<N>;
+    fn into_static(self) -> Point<N>;
 }
 
 impl<const N: usize> MaybeStatic<N> for Point<N> {
-    fn as_static(self) -> Point<N> {
+    fn into_static(self) -> Point<N> {
         self
     }
 }
 
 impl<const N: usize> MaybeStatic<N> for DVector<f64> {
-    fn as_static(self) -> Point<N> {
+    fn into_static(self) -> Point<N> {
         Point::from_row_slice(self.as_slice())
     }
 }
@@ -137,7 +137,7 @@ impl<O, F> Task<O, F>
         O: Optimizer<X: MaybeStatic<N>, F = f64>,
         F: Function<N>,
     {
-        self.optimizer.optimize(|p| F::f(p.as_static()))
+        self.optimizer.optimize(|p| F::f(p.into_static()))
     }
 
     #[cfg(test)]
@@ -153,7 +153,7 @@ impl<O, F> Task<O, F>
         Check {
             eps_x: 1e-5,
             eps_y: 1e-5,
-            x: xs.as_static(),
+            x: xs.into_static(),
             f,
             restrictions: vec![],
             _phantom: Default::default(),

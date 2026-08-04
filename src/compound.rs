@@ -20,13 +20,13 @@ impl Optimizer for NestedTasks {
 
     fn optimize(
         &self,
-        mut f: impl FnMut(Self::X) -> Self::F,
+        f: impl FnMut(Self::X) -> Self::F,
     ) -> (Self::X, Self::F, Self::Metadata) {
         let (x, f) = Optimize {
             builder: self.builder.clone(),
             restrictions: &self.restrictions,
         }
-        .run(Box::new(|p| f(p)));
+        .run(Box::new(f));
         (x, f, ())
     }
 }
@@ -45,7 +45,7 @@ impl Optimize<'_> {
             restrictions: std::slice::from_ref(r),
         };
 
-        let higher = if rs.len() > 0 {
+        let higher = if !rs.is_empty() {
             Optimize {
                 builder: self.builder.clone(),
                 restrictions: rs,

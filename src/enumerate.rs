@@ -57,7 +57,7 @@ impl<const N: usize> Optimizer for MonteCarlo<N> {
         &self,
         mut f: impl FnMut(Self::X) -> Self::F,
     ) -> (Self::X, Self::F, Self::Metadata) {
-        let map_to = |x, y: RangeInclusive<f64>| return (y.end() - y.start()) * x + y.start();
+        let map_to = |x, y: RangeInclusive<f64>| (y.end() - y.start()) * x + y.start();
 
         let x = (0..self.n)
             .map(|_| Point::<N>::new_random().zip_map(&self.distributions, map_to))
